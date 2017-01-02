@@ -49,14 +49,15 @@ function DistributedScan-vpsGetResults (){
 ssh-add
 echo "what is the project name:"
 read project
+echo "Creating a folder to place all the results in /root/projects/"$project
 mkdir -p /root/projects/$project
 cd /root/projects/$project
 rm vulter-servers.csv
 curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json > servers.csv && cat servers.csv |  cat servers.csv | grep scanmachine1| cut -d"," -f10 > scanners_IP 
 pssh -i -h /root/projects/$project/scanners_IP  -x "-oStrictHostKeyChecking=no" ls 
 #install rsync on remote servers
-pssh -i -h /root/projects/$project/scanners_IP  -x "-oStrictHostKeyChecking=no" apt-get install rsync > /dev/null
-pssh -i -h /root/projects/$project/scanners_IP  -x "-oStrictHostKeyChecking=no" apt-get install rsync > /dev/null
+pssh -i -h /root/projects/$project/scanners_IP  -x "-oStrictHostKeyChecking=no" apt-get install rsync -y > /dev/null
+pssh -i -h /root/projects/$project/scanners_IP  -x "-oStrictHostKeyChecking=no" apt-get install rsync -y > /dev/null
 for i in $(cat /root/projects/$project/scanners_IP); do rsync -avz --remove-source-files -e ssh  root@$i:/nmap_output/* /root/projects/$project --rsync-path=/usr/bin/rsync & done 
 }
 #data retreival 
@@ -68,6 +69,7 @@ echo "Make sure you don't have any more scans running on your scanners."
 echo "Run the Data Fetching function one last time and wait for it to finish."
 echo -e " \e[91m \e[1;4m after you've made sure you retreived all the results and no new scans are running, run the following command:"
 echo -e "\e[0mfor i in \$(cat scanners_subid);do curl -H "\"API-Key: "$VULTRAPIKEY"\"" https://api.vultr.com/v1/server/destroy --data 'SUBID='\$i'';done"
+curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f1 > scanners_subid
 }
 
 function DistributedScan-parseResults(){
@@ -82,7 +84,7 @@ if [[ -f ./targets && -f ./ports ]];then
 	echo "Creating command file" 
 	echo "This may take a while, please do not CTRL+C"
 	printf "53\n80\n443\n67\n20" > /root/randomport
-	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port --source-port $( cat  ~/randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1)  --mtu $( shuf -i 50-100 -n 1)\n" ; done ;done > commandsFile
+	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port --source-port $( cat  ~/randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1)  --mtu $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$port\n"; done ;done > commandsFile-$(cat ports | tr "\n" "-")
 
 else
 	echo "targets or ports missing"
@@ -98,9 +100,15 @@ read  dcid
 echo $VULTRAPIKEY
 echo "How many instances to create:"
 read number
-for i in $(seq 1 $number); do date ;done
-echo "creating" $number "scanners in location" $dcid
+#for i in $(seq 1 $number); do date ;done
+echo "Creating" $number "scanners in location" $dcid
 for i in $(seq 1 $number); do  curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/create  --data 'VPSPLANID=29' --data 'OSID=193' --data 'SCRIPTID=18661'  --data 'SSHKEYID=578f78ece9844' --data "DCID="$dcid"" --data "label=scanmachine1"; done;
+echo "Finished Creating" $number "scanners in location" $dcid 
+
+}
+function DistributedScan-vultrGetScannersInfo(){
+curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f1 > scanners_subid
+curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f10 > scanners_IP
 
 }
 
