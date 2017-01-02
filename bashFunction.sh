@@ -89,7 +89,7 @@ else
 fi
 }
 
-function DistributedScan-vulterCreateScanners(){
+function DistributedScan-vultrCreateScanners(){
 echo "If you are not sure what information you need to enter you should CTRL+C and read the documentation!"
 echo "Make sure you've updated the correct SSH key and starup script in this script" 
 echo "Where do you want to create your scanners(if you are not sure"
