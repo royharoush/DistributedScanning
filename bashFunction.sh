@@ -29,17 +29,13 @@ rm vulter-servers.csv
 curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |  cut -d"," -f1,10,16
 }
 
-function DistributedScan-vultrGetScannersIP(){
+#function DistributedScan-vultrGetScannersIP(){
+#curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f10 > scanners_IP
+#}
 
-
-curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f10 > scanners_IP
-}
-
-function DistributedScan-vultrGetScannersSubID(){
-
-curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f1 > scanners_subid
-
-}
+#function DistributedScan-vultrGetScannersSubID(){
+#curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f1 > scanners_subid
+#}
 
 function DistributedScan-vultrGetLocations(){
 curl https://api.vultr.com/v1/regions/list | jq . > locations.json && json2csv.py locations.json
@@ -84,7 +80,7 @@ if [[ -f ./targets && -f ./ports ]];then
 	echo "Targets and Ports exists"
 	echo "Creating command file" 
 	echo "This may take a while, please do not CTRL+C"
-	printf "53\n80\n443\n67\n20" > /root/randomport
+	printf "53\n80\n443\n67\n20" > /tmp/randomport
 	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port --source-port $( cat  ~/randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1)  --mtu $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$port\n"; done ;done > commandsFile-$(cat ports | tr "\n" "-")
 
 else
@@ -96,11 +92,11 @@ fi
 function DistributedScan-commandFileCreateNoneEvasive(){
 if [[ -f ./targets ]];then
 	echo "Targets file exists"
-	echo "Enter the ports to scan, you can use "-p port-list" or "--top-ports XXX""
+	echo "Enter the ports to scan, you can use "-p port-list,singleport" or "--top-ports XXX":"
 	read port
 	echo "Creating command file" 
 	echo "This may take a while, please do not CTRL+C"
-	printf "53\n80\n443\n67\n20" > /root/randomport
+	printf "53\n80\n443\n67\n20" > /tmp/randomport
 	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ); do printf "nmap $ip  $port --source-port $( cat  ~/randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1)  --mtu $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$(echo $port |tr " " "_")\n";done > commandFile-$(echo $port |tr " " "_" | tr "," "-").txt
 
 else
