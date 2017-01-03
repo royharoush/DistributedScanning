@@ -59,7 +59,7 @@ pssh -i -h /root/projects/$project/scanners_IP  -x "-oStrictHostKeyChecking=no" 
 #install rsync on remote servers
 pssh -i -h /root/projects/$project/scanners_IP  -x "-oStrictHostKeyChecking=no" apt-get install rsync -y > /dev/null
 pssh -i -h /root/projects/$project/scanners_IP  -x "-oStrictHostKeyChecking=no" apt-get install rsync -y > /dev/null
-for i in $(cat /root/projects/$project/scanners_IP); do rsync -avz --remove-source-files -e ssh  root@$i:/nmap_output/* /root/projects/$project --rsync-path=/usr/bin/rsync & done 
+for i in $(cat /root/projects/$project/scanners_IP); do rsync -avz --track-progress --remove-source-files -e ssh  root@$i:/nmap_output/* /root/projects/$project --rsync-path=/usr/bin/rsync & done 
 }
 #data retreival 
 
@@ -91,6 +91,24 @@ else
 	echo "targets or ports missing"
 fi
 }
+
+##Create None Evasive Command file 
+function DistributedScan-commandFileCreateNoneEvasive(){
+if [[ -f ./targets ]];then
+	echo "Targets file exists"
+	echo "Enter the ports to scan, you can use "-p port-list" or "--top-ports XXX""
+	read port
+	echo "Creating command file" 
+	echo "This may take a while, please do not CTRL+C"
+	printf "53\n80\n443\n67\n20" > /root/randomport
+	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ); do printf "nmap $ip  $port --source-port $( cat  ~/randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1)  --mtu $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$(echo $port |tr " " "_")\n";done > commandFile-$(echo $port |tr " " "_" | tr "," "-").txt
+
+else
+	echo "targets file missing, please create it"
+fi
+}
+
+
 
 function DistributedScan-vultrCreateScanners(){
 echo "If you are not sure what information you need to enter you should CTRL+C and read the documentation!"
