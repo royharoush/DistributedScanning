@@ -94,8 +94,9 @@ fi
 function DistributedScan-vultrCreateScanners(){
 echo "If you are not sure what information you need to enter you should CTRL+C and read the documentation!"
 echo "Make sure you've updated the correct SSH key and starup script in this script" 
-echo "Where do you want to create your scanners(if you are not sure"
-echo "You need to check the DCID in using DistributedScan-vultrGetLocations):"
+curl https://api.vultr.com/v1/regions/list | jq . > locations.json && json2csv.py locations.json
+echo "Where do you want to create your scanners?(enter a location ID from the above list)"
+#echo "(if you are not sure you need to check the DCID in using DistributedScan-vultrGetLocations):"
 read  dcid
 echo $VULTRAPIKEY
 echo "How many instances to create:"
