@@ -4,6 +4,7 @@
 function DistributedScan-Setup(){
 wget https://raw.githubusercontent.com/royharoush/rtools/master/json2csv.py -O /usr/bin/json2csv.py && chmod +x /usr/bin/json2csv.py
 apt-get install jq -y > /dev/nul 
+apt-get install pv -y > /dev/nul
 printf "Finished ! "
 }
 
