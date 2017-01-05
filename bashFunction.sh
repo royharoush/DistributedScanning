@@ -5,6 +5,7 @@ function DistributedScan-Setup(){
 wget https://raw.githubusercontent.com/royharoush/rtools/master/json2csv.py -O /usr/bin/json2csv.py && chmod +x /usr/bin/json2csv.py
 apt-get install jq -y > /dev/nul 
 apt-get install pv -y > /dev/nul
+apt-get install pssh -y >/dev/nul
 printf "Finished ! "
 }
 
@@ -55,7 +56,7 @@ pssh -i -h /root/projects/$project/scanners_IP  -x "-oStrictHostKeyChecking=no" 
 #install rsync on remote servers
 pssh -i -h /root/projects/$project/scanners_IP  -x "-oStrictHostKeyChecking=no" apt-get install rsync -y > /dev/null
 pssh -i -h /root/projects/$project/scanners_IP  -x "-oStrictHostKeyChecking=no" apt-get install rsync -y > /dev/null
-for i in $(cat /root/projects/$project/scanners_IP); do rsync -avz --track-progress --remove-source-files -e ssh  root@$i:/nmap_output/* /root/projects/$project --rsync-path=/usr/bin/rsync & done 
+for i in $(cat /root/projects/$project/scanners_IP); do rsync -avz  --remove-source-files -e ssh  root@$i:/nmap_output/* /root/projects/$project --rsync-path=/usr/bin/rsync & done 
 }
 #data retreival 
 
@@ -126,6 +127,19 @@ function DistributedScan-vultrGetScannersInfo(){
 curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f1 > scanners_subid
 curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f10 > scanners_IP
 
+}
+
+function DistributedScan-vpsExecuteCommand(){
+echo "enter the command you would like to execute:"
+read command
+ssh-add 
+if [[ -f ./scanners_IP ]];then
+	pssh -i -h scanners_IP  -x "-oStrictHostKeyChecking=no" "$command"
+else
+	echo "Geting scanners IP file"
+	curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f10 > scanners_IP
+	pssh -i -h scanners_IP  -x "-oStrictHostKeyChecking=no" "$command"
+fi	
 }
 
 ##Distributed Scan Process ##
