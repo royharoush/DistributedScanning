@@ -89,7 +89,7 @@ else
 fi
 }
 
-##Create None Evasive Command file 
+##Create None Evasive None Command file 
 function DistributedScan-commandFileCreateNoneEvasive(){
 if [[ -f ./targets ]];then
 	echo "Targets file exists"
@@ -121,12 +121,33 @@ read number
 echo "Creating" $number "scanners in location" $dcid
 for i in $(seq 1 $number); do  curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/create  --data 'VPSPLANID=29' --data 'OSID=193' --data 'SCRIPTID=18661'  --data 'SSHKEYID=578f78ece9844' --data "DCID="$dcid"" --data "label=scanmachine1"; done;
 echo "Finished Creating" $number "scanners in location" $dcid 
-
 }
+
+function DistributedScan-vultrCreateDnmapServer(){
+echo "If you are not sure what information you need to enter you should CTRL+C and read the documentation!"
+echo "Make sure you've updated the correct SSH key and starup script in this script" 
+curl https://api.vultr.com/v1/regions/list | jq . > locations.json && json2csv.py locations.json
+echo "Where do you want to create your scanners?(enter a location ID from the above list)"
+#echo "(if you are not sure you need to check the DCID in using DistributedScan-vultrGetLocations):"
+read  dcid
+echo $VULTRAPIKEY
+echo "How many instances to create:"
+read number
+#for i in $(seq 1 $number); do date ;done
+echo "Creating" $number "Dnmap Server in" $dcid
+for i in $(seq 1 $number); do  curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/create  --data 'VPSPLANID=29' --data 'OSID=193' --data 'SCRIPTID=18661'  --data 'SSHKEYID=578f78ece9844' --data "DCID="$dcid"" --data "label=dnmapserver"; done;
+echo "Finished Creating" $number "Servers in location" $dcid 
+}
+
 function DistributedScan-vultrGetScannersInfo(){
 curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f1 > scanners_subid
 curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f10 > scanners_IP
+}
 
+function DistributedScan-vultrGetDnmapServerInfo(){
+curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep dnmapserver | cut -d "," -f1 > DnmapServer_subid
+curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep dnmapserver | cut -d "," -f10 > DnmapServer_IP
+echo -e " \e[91m \e[1;4m LOG IN TO YOUR SERVER AND EXECUTE DNMAP TO ALLOW CONNETIONS FROM SCANNERS"
 }
 
 function DistributedScan-vpsExecuteCommand(){
