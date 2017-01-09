@@ -82,7 +82,7 @@ if [[ -f ./targets && -f ./ports ]];then
 	echo "Creating command file" 
 	echo "This may take a while, please do not CTRL+C"
 	printf "53\n80\n443\n67\n20" > ./randomport
-	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1)  --mtu $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$port\n"; done ;done > commandsFile-$(cat ports | tr "\n" "-")
+	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$port\n"; done ;done > commandsFile-$(cat ports | tr "\n" "-")
 
 else
 	echo "targets or ports missing"
@@ -98,7 +98,7 @@ if [[ -f ./targets ]];then
 	echo "Creating command file" 
 	echo "This may take a while, please do not CTRL+C"
 	printf "53\n80\n443\n67\n20" > ./randomport
-	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ); do printf "nmap $ip  $port --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1)  --mtu $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$(echo $port |tr " " "_")\n";done > commandFile-$(echo $port |tr " " "_" | tr "," "-").txt
+	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ); do printf "nmap $ip  $port --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$(echo $port |tr " " "_")\n";done > commandFile-$(echo $port |tr " " "_" | tr "," "-").txt
 
 else
 	echo "targets file missing, please create it"
@@ -135,7 +135,7 @@ echo "How many instances to create:"
 read number
 #for i in $(seq 1 $number); do date ;done
 echo "Creating" $number "Dnmap Server in" $dcid
-for i in $(seq 1 $number); do  curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/create  --data 'VPSPLANID=29' --data 'OSID=193' --data 'SCRIPTID=18661'  --data 'SSHKEYID=578f78ece9844' --data "DCID="$dcid"" --data "label=dnmapserver"; done;
+for i in $(seq 1 $number); do  curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/create  --data 'VPSPLANID=29' --data 'OSID=194' --data 'SCRIPTID=18661'  --data 'SSHKEYID=578f78ece9844' --data "DCID="$dcid"" --data "label=dnmapserver"; done;
 echo "Finished Creating" $number "Servers in location" $dcid 
 }
 
