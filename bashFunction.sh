@@ -76,34 +76,85 @@ wget https://raw.githubusercontent.com/royharoush/rtools/master/nmaParseClean.sh
 
 
 ##Create Evasive Command file 
-function DistributedScan-commandFileCreateEvasive(){
+function DistributedScan-commandFileCreate_4(){
 if [[ -f ./targets && -f ./ports ]];then
 	echo "Targets and Ports exists"
 	echo "Creating command file" 
 	echo "This may take a while, please do not CTRL+C"
 	printf "53\n80\n443\n67\n20" > ./randomport
-	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$port\n"; done ;done > commandsFile-$(cat ports | tr "\n" "-")
+	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port -Pn --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$port\n"; done ;done > nmapCommands-Evasion_4-$(cat ports | tr "\n" "-")
 
 else
 	echo "targets or ports missing"
 fi
 }
 
-##Create None Evasive None Command file 
-function DistributedScan-commandFileCreateNoneEvasive(){
+function DistributedScan-commandFileCreate_3(){
 if [[ -f ./targets ]];then
 	echo "Targets file exists"
 	echo "Enter the ports to scan, you can use "-p port-list,singleport" or "--top-ports XXX":"
 	read port
 	echo "Creating command file" 
 	echo "This may take a while, please do not CTRL+C"
-	printf "53\n80\n443\n67\n20" > ./randomport
-	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ); do printf "nmap $ip  $port --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$(echo $port |tr " " "_")\n";done > commandFile-$(echo $port |tr " " "_" | tr "," "-").txt
+	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ); do printf "nmap $ip  $port -Pn --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1) -oA \"nmap_result_$ip-$port\"\n";done > nmapCommands-Evasion_3-$(echo $port |tr " " "_" | tr "," "-")
 
 else
 	echo "targets file missing, please create it"
 fi
 }
+
+
+##Create None Evasive None Command file 
+function DistributedScan-commandFileCreate_2(){
+if [[ -f ./targets && -f ./ports ]];then
+	echo "Targets and Ports exists"
+	echo "Creating command file" 
+	echo "This may take a while, please do not CTRL+C"
+	printf "53\n80\n443\n67\n20" > ./randomport
+	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port -Pn -oA nmap_result_$ip-$port\n"; done ;done > nmapCommands-Evasion_2-$(cat ports | tr "\n" "-")
+
+else
+	echo "targets or ports missing"
+fi
+}
+
+##Create very none evasive command file 
+function DistributedScan-commandFileCreate_1(){
+if [[ -f ./targets ]];then
+	echo "Targets file exists"
+	echo "Enter the ports to scan, you can use "-p port-list,singleport" or "--top-ports XXX":"
+	read port
+	echo "Creating command file" 
+	echo "This may take a while, please do not CTRL+C"
+	rm nmapTargets > /dev/nul
+	nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u | cut -d" " -f 5 | shuf | sort -R  > nmapTargets
+	for ip in $(cat nmapTargets) ; do echo  "nmap $ip -Pn $port -oA \"nmapResult_"$ip"_$port\"" ; done  > nmapCommands-Evasion_1-$(echo $port | tr "," "_" | tr " " "_" )
+	rm nmapTargets 
+
+else
+	echo "targets file missing, please create it"
+fi
+}
+
+
+
+function DistributedScan-commandFileCreateInfo(){
+echo "Command files are the source files for Dnmapserver and they contain the nmap commands to be executed by the scanners."
+echo "These commands will allow you to create command files using different types of techniques, using mainly 2 different evasion techniques:"
+echo 			"1. randomizing the IP-Port pairs, so that hosts should not be scanned twice for the same port by the same scanner instance."
+echo			"2. randomizing traffic paramters, such as the TCP data length and the souce port."
+echo "The commands creation time of creation varies based on how complex it is perform the randomization, as much randmoized scans will take longer to produce. "
+echo "Below is an explaintion of the complexlity level for each commadn file creation function "
+echo " "
+echo "commandFileCreate_1: This function creates a command file very quickly, but will not randomize IP-Port pairs and will not randomize traffic parameters"
+echo "commandFileCreate_2: This function creates a command file very fairly quick, but will not randomize randomize traffic parameters, it will randomize IP-Port pairs"
+echo "commandFileCreate_3: This function creates a command file kinda slow and will randomize traffic parameters but will not randomize IP-Port pairs"
+echo "commandFileCreate_4: This function creates a command file kinda very slowly and will randomize traffic parameters as well as IP-Port pairs"
+echo "in short, the higher the number, the longer it will take to create the command file, but the more evasive it will be:"
+}
+
+	
+#	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ); do printf "nmap $ip  $port -Pn --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1) -oA nmap_result_#$ip-$(echo $port |tr " " "_")\n";done > commandFile-$(echo $port |tr " " "_" | tr "," "-").txt
 
 
 
