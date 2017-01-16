@@ -13,6 +13,11 @@ https://my.vultr.com/startup/
 
 the startup script you should use is also in this project, modify the IP of your dnmap server.
 
+
+###Grab your Vultr API key here 
+https://my.vultr.com/settings/#settingsapi
+
+
 ###Update the script ID and SSH Key ID in the DistributedScan-vultrCreateScanners function.
 
 
