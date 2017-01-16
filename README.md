@@ -3,7 +3,7 @@ This project shows how to implement a distributed scanning startagy using mostly
 
 ###read the comments in the scripts for more information 
 
-###Add an SSH key on vulter in the following URL:
+###Add an SSH key on vultr in the following URL:
 
 https://my.vultr.com/sshkeys/
 
