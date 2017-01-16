@@ -196,7 +196,7 @@ curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers
 }
 
 
-function DistributedScan-vulerDnmapServerInfo(){
+function DistributedScan-vultrDnmapServerInfo(){
 echo "in order to use a dnmap server build one and make sure the server works, as there seems to be an issue with the twisted library in later debian releaes"
 echo "if you want to import this scripts functions into your dnmap server, run the below command"
 echo "wget https://raw.githubusercontent.com/royharoush/DistributedScanning/master/bashFunction.sh && source bashFunction.sh"
