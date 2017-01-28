@@ -119,5 +119,4 @@ parsing script
 
 ### Results screenshots
 
-
-
+![alt tag](https://i.imgur.com/LFNmd0o.png)
