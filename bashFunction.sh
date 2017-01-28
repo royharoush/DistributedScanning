@@ -214,11 +214,11 @@ echo "enter the command you would like to execute:"
 read command
 ssh-add 
 if [[ -f ./scanners_IP ]];then
-	pssh -i -h scanners_IP  -x "-oStrictHostKeyChecking=no" "$command"
+	pssh -o -i -h scanners_IP  -x "-oStrictHostKeyChecking=no" "$command"
 else
 	echo "Geting scanners IP file"
 	curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f10 > scanners_IP
-	pssh -i -h scanners_IP  -x "-oStrictHostKeyChecking=no" "$command"
+	pssh -o -i -h scanners_IP  -x "-oStrictHostKeyChecking=no" "$command"
 fi	
 }
 
