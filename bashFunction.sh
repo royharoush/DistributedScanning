@@ -222,5 +222,14 @@ else
 fi	
 }
 
+function DistributedScan-CheckScanProgress
+if [ $# -lt 2 ]; then
+echo "you need to provide the trace file and the corrosponding command file"
+echo "example: DistributedScan-CheckScanProgress commandfile.dnmaptrace commandfile "
+	else
+	watch -n 1 "	cat $1 | xargs -I '{}' grep -n '{}'  $2	"
+
+fi
+
 ##Distributed Scan Process ##
 
