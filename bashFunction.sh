@@ -82,7 +82,7 @@ if [[ -f ./targets && -f ./ports ]];then
 	echo "Creating command file" 
 	echo "This may take a while, please do not CTRL+C"
 	printf "53\n80\n443\n67\n20" > ./randomport
-	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port -Pn --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$port\n"; done ;done > nmapCommands-Evasion_4-$(cat ports | tr "\n" "-")
+	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port -Pn --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$port\n"; done ;done > nmapCommands-EvasionSorted_4-$(cat ports | tr "\n" "-") && sort -R nmapCommands-EvasionSorted_4-$(cat ports | tr "\n" "-") | shuf > nmapCommands-Evasion_4-$(cat ports | tr "\n" "-") 
 
 else
 	echo "targets or ports missing"
