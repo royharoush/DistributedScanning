@@ -83,7 +83,6 @@ for i in $(cat /root/projects/$project/scanners_IP); do rsync -avz  --remove-sou
 }
 #data retreival 
 
-
 #Delete scanners
 function DistributedScan-vultrDeleteScanners(){
 echo "Make sure you don't have any more scans running on your scanners."
@@ -92,6 +91,7 @@ echo -e " \e[91m \e[1;4m after you've made sure you retreived all the results an
 echo -e "\e[0mfor i in \$(cat scanners_subid);do curl -H "\"API-Key: "$VULTRAPIKEY"\"" https://api.vultr.com/v1/server/destroy --data 'SUBID='\$i'';done"
 curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers.json && <servers.json jq '.'  | sed s'/},/},\n/' > servers-json.json && json2csv.py servers-json.json |grep scan | cut -d "," -f1 > scanners_subid
 }
+
 
 function DistributedScan-parseResults(){
 wget https://raw.githubusercontent.com/royharoush/rtools/master/nmaParseClean.sh -O parse.sh && bash parse.sh
