@@ -45,16 +45,25 @@ function DistributedScan-vultrGetLocations(){
 curl https://api.vultr.com/v1/regions/list | jq . > locations.json && json2csv.py locations.json
 }
 
-function DistributedScan-vultrCreateStartupScript(){
+function DistributedScan-vultrGetLocations(){
+curl https://api.vultr.com/v1/regions/list | jq . > locations.json && json2csv.py locations.json
+}
+
+function DistributedScan-vultrCreateBootScript(){
+echo "Enter the name of the script (this is only a friendly name):"
+read scriptname
 echo "Enter the Designated Dnmap server to be pushed into the script:"
 read dnmapserver
 echo "Enter the Dnmap server's port:"
 read dnmapport
-curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/startupscript/create --data 'name=temp1' --data 'script=#!/bin/bash%0d%0asleep 5%0d%0aapt-key adv --keyserver pgp.mit.edu --recv-keys ED444FF07D8D0BF6%0d%0a> /etc/apt/apt.conf.d/01keep-debs%0d%0aprintf "deb http://http.kali.org/kali kali-rolling main contrib non-free" > /etc/apt/sources.list%0d%0asleep 3%0d%0aexport DEBIAN_FRONTEND=noninteractive%0d%0aapt-get purge %0d%0 apt-get update -y -q %0d%0asleep 3%0d%0aapt-get install screen -y%0d%0aapt-get install dnmap -y --force-yes --assume-yes %0d%0aapt-get install bash-completion -y --force-yes --assume-yes %0d%0acp /etc/skel/.bashrc ~/%0d%0asleep 3%0d%0aapt-get install nmap -y --force-yes --assume-yes %0d%0asleep 3%0d%0adnmap_client -s "$DNMAPSERVER" -p "$DNMAPPORT"' | grep SCRIPTID | cut -d":" -f2 | tr -d } > startupScriptId
-
-
-
+echo "creating a script with "$dnmapserver" and "$dnmapport" as your dnmapserver"
+curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/startupscript/create --data "name="$scriptname"" --data "script=#!/bin/bash%0d%0asleep 5%0d%0aapt-key adv --keyserver pgp.mit.edu --recv-keys ED444FF07D8D0BF6%0d%0a> /etc/apt/ap$
+echo "Your new boot script ID is $(cat startupScriptId)"
 }
+
+
+
+
 #vultr
 #Data  Retreival
 function DistributedScan-vpsGetResults (){
