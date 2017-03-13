@@ -7,8 +7,8 @@ apt-get install jq -y > /dev/null
 apt-get install pv -y > /dev/null
 apt-get install pssh -y >/dev/null
 apt-get install cssh -y >/dev/null
-apt-get install ssh
-apt
+
+
 printf "Finished ! "
 }
 
