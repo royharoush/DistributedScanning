@@ -93,54 +93,10 @@ curl -H "API-Key: "$VULTRAPIKEY"" https://api.vultr.com/v1/server/list > servers
 }
 
 
-function DistributedScan-parseResults(){
-wget https://raw.githubusercontent.com/royharoush/rtools/master/nmaParseClean.sh -O parse.sh && bash parse.sh
 }
 
 
 ##Create Evasive Command file 
-function DistributedScan-commandFileCreate_4(){
-if [[ -f ./targets && -f ./ports ]];then
-	echo "Targets and Ports exists"
-	echo "Creating command file" 
-	echo "This may take a while, please do not CTRL+C"
-	printf "53\n80\n443\n67\n20" > ./randomport
-	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port -Pn --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1) -oA nmap_result_$ip-$port\n"; done ;done > nmapCommands-EvasionSorted_4-$(cat ports | tr "\n" "-") && sort -R nmapCommands-EvasionSorted_4-$(cat ports | tr "\n" "-") | shuf > nmapCommands-Evasion_4-$(cat ports | tr "\n" "-") && rm nmapCommands-EvasionSorted_4-$(cat ports | tr "\n" "-")
-
-else
-	echo "targets or ports missing"
-fi
-}
-
-function DistributedScan-commandFileCreate_3(){
-if [[ -f ./targets ]];then
-	echo "Targets file exists"
-	echo "Enter the ports to scan, you can use "-p port-list,singleport" or "--top-ports XXX":"
-	read port
-	echo "Creating command file" 
-	echo "This may take a while, please do not CTRL+C"
-	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  |shuf | sort -R | cut -d" " -f 5  ); do printf "nmap $ip  $port -Pn --source-port $( cat  ./randomport  | shuf  | head -1)  --data-length $( shuf -i 50-100 -n 1) -oA \"nmap_result_$ip-$port\"\n";done > nmapCommands-Evasion_3-$(echo $port |tr " " "_" | tr "," "-")
-
-else
-	echo "targets file missing, please create it"
-fi
-}
-
-
-##Create None Evasive None Command file 
-function DistributedScan-commandFileCreate_2(){
-if [[ -f ./targets && -f ./ports ]];then
-	echo "Targets and Ports exists"
-	echo "Creating command file" 
-	echo "This may take a while, please do not CTRL+C"
-	printf "53\n80\n443\n67\n20" > ./randomport
-	for ip in $(nmap -iL targets -sL -Pn -sn -n  | grep "Nmap scan report"| sort -u  | cut -d" " -f 5  ) ; do for port in $(cat ports); do printf "nmap $ip -p $port -Pn -oA nmap_result_$ip-$port\n"; done ;done > nmapCommands-EvasionSorted_2-$(cat ports | tr "\n" "-") && sort -R nmapCommands-EvasionSorted_2-$(cat ports | tr "\n" "-") | shuf > nmapCommands-Evasion_2-$(cat ports | tr "\n" "-") 
-
-else
-	echo "targets or ports missing"
-fi
-}
-
 ##Create very none evasive command file 
 function DistributedScan-commandFileCreate_1(){
 if [[ -f ./targets ]];then
